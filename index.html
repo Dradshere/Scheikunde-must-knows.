@@ -1,0 +1,291 @@
+<!doctype html>
+<html lang="nl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Scheikunde must-knows</title>
+  <style>
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,"Helvetica Neue",Arial;max-width:900px;margin:30px auto;padding:0 20px;color:#111}
+    h1{font-size:1.6rem;margin-bottom:0.2rem}
+    p.lead{color:#444;margin-top:0;margin-bottom:1rem}
+    table{width:100%;border-collapse:collapse;margin-bottom:1rem}
+    th,td{border:1px solid #e6e6e6;padding:8px;text-align:left}
+    th{background:#fafafa}
+    input.answer{width:150px;padding:6px;font-weight:600}
+    .correct{background:#e6ffea}
+    .wrong{background:#ffecec}
+    .ans{font-weight:700}
+    #result{font-size:1.1rem;margin-top:10px}
+    .controls{display:flex;gap:10px;margin-bottom:12px;align-items:center}
+    button{padding:8px 12px;border-radius:6px;border:1px solid #bbb;background:#fff;cursor:pointer}
+    button.primary{background:#0366d6;color:#fff;border-color:#0366d6}
+    select{padding:6px;border-radius:4px;border:1px solid #bbb;cursor:pointer}
+    small{color:#666}
+  </style>
+</head>
+<body>
+  <h1>Scheikunde must-knows.</h1>
+  <p class="lead">Kies de quiz en de richting.</p>
+
+  <div class="controls">
+    <label for="quizSelect">Quiz: </label>
+    <select id="quizSelect">
+      <option value="periodiek">Periodieke Tabel</option>
+      <option value="brinclhof">BrINClHOF</option>
+      <option value="voorvoegsels">Voorvoegsels</option>
+      <option value="achtervoegsels">Achtervoegsels</option>
+    </select>
+<label for="direction" id="directionLabel">Richting: </label>
+<select id="direction">
+  <option value="nameToSymbol">Naam → Symbool</option>
+  <option value="symbolToName">Symbool → Naam</option>
+  <option value="numberToPrefix">Nummer → Voorvoegsel</option>
+  <option value="prefixToNumber">Voorvoegsel → Nummer</option>
+  <option value="atomToSuffix">Atoom → Achtervoegsel</option>
+  <option value="suffixToAtom">Achtervoegsel → Atoom</option>
+</select>    
+<button id="checkBtn" class="primary">Controleer antwoorden</button>
+    <button id="showBtn">Toon antwoorden</button>
+    <button id="resetBtn">Reset quiz</button>
+    <div style="margin-left:auto"><small>Score: <br><span id="score">0</span> / <span id="total">0</span></small></div>
+  </div>
+
+  <table id="quizTable">
+    <thead>
+      <tr><th>#</th><th id="col1">Element</th><th id="col2">Symbool</th><th>Feedback</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <div id="result" aria-live="polite"></div>
+
+  <footer style="margin-top:18px;color:#666"><small>Alle namen en termen zijn volledig in het Nederlands weergegeven.</small></footer>
+
+<script>
+document.addEventListener("DOMContentLoaded", () => {
+  const quizData = {
+    periodiek: [
+      {naam: 'Aluminium', symbool: 'Al'}, {naam: 'Argon', symbool: 'Ar'},
+      {naam: 'Barium', symbool: 'Ba'}, {naam: 'Broom', symbool: 'Br'},
+      {naam: 'Cadmium', symbool: 'Cd'}, {naam: 'Calcium', symbool: 'Ca'},
+      {naam: 'Chloor', symbool: 'Cl'}, {naam: 'Chroom', symbool: 'Cr'},
+      {naam: 'Fluor', symbool: 'F'}, {naam: 'Fosfor', symbool: 'P'},
+      {naam: 'Goud', symbool: 'Au'}, {naam: 'Helium', symbool: 'He'},
+      {naam: 'Ijzer', symbool: 'Fe'}, {naam: 'Jood', symbool: 'I'},
+      {naam: 'Thallium', symbool: 'Tl'}, {naam: 'Kobalt', symbool: 'Co'},
+      {naam: 'Koolstof', symbool: 'C'}, {naam: 'Koper', symbool: 'Cu'},
+      {naam: 'Kwik', symbool: 'Hg'}, {naam: 'Lithium', symbool: 'Li'},
+      {naam: 'Lood', symbool: 'Pb'}, {naam: 'Magnesium', symbool: 'Mg'},
+      {naam: 'Mangaan', symbool: 'Mn'}, {naam: 'Natrium', symbool: 'Na'},
+      {naam: 'Neon', symbool: 'Ne'}, {naam: 'Nikkel', symbool: 'Ni'},
+      {naam: 'Platina', symbool: 'Pt'}, {naam: 'Silicium', symbool: 'Si'},
+      {naam: 'Stikstof', symbool: 'N'}, {naam: 'Tin', symbool: 'Sn'},
+      {naam: 'Uranium', symbool: 'U'}, {naam: 'Waterstof', symbool: 'H'},
+      {naam: 'Zilver', symbool: 'Ag'}, {naam: 'Zink', symbool: 'Zn'},
+      {naam: 'Zuurstof', symbool: 'O'}, {naam: 'Zwavel', symbool: 'S'}
+    ],
+    brinclhof: [
+      {naam: 'Broom'}, {naam: 'Jood'}, {naam: 'Stikstof'},
+      {naam: 'Chloor'}, {naam: 'Waterstof'}, {naam: 'Zuurstof'}, {naam: 'Fluor'}
+    ],
+    voorvoegsels: [
+      {naam: 'Mono', index: '1'}, {naam: 'Di', index: '2'}, {naam: 'Tri', index: '3'},
+      {naam: 'Tetra', index: '4'}, {naam: 'Penta', index: '5'}, {naam: 'Hexa', index: '6'}
+    ],
+    achtervoegsels: [
+      {naam: 'O', achtervoegsel: 'oxide'},
+      {naam: 'S', achtervoegsel: 'sulfide'},
+      {naam: 'F', achtervoegsel: 'fluoride'},
+      {naam: 'Cl', achtervoegsel: 'chloride'},
+      {naam: 'Br', achtervoegsel: 'bromide'},
+      {naam: 'I', achtervoegsel: 'jodide'}
+    ]
+  };
+
+  const tbody = document.querySelector('#quizTable tbody');
+  const totalSpan = document.getElementById('total');
+  const scoreSpan = document.getElementById('score');
+  const resultDiv = document.getElementById('result');
+  const directionSelect = document.getElementById('direction');
+  const quizSelect = document.getElementById('quizSelect');
+  const col1 = document.getElementById('col1');
+  const col2 = document.getElementById('col2');
+
+  function shuffle(array){
+    for(let i=array.length-1;i>0;i--){
+      const j = Math.floor(Math.random()*(i+1));
+      [array[i], array[j]] = [array[j], array[i]];
+    }
+  }
+
+function updateDirectionOptions() {
+  const quiz = quizSelect.value;
+  const dir = directionSelect;
+  const dirLabel = document.getElementById('directionLabel');
+
+  Array.from(dir.options).forEach(opt => opt.style.display = 'none');
+
+  if(quiz === 'periodiek'){
+    dir.style.display = '';
+    dirLabel.style.display = '';
+    dir.value = 'nameToSymbol';
+    dir.querySelector('[value="nameToSymbol"]').style.display = '';
+    dir.querySelector('[value="symbolToName"]').style.display = '';
+  } 
+  else if(quiz === 'brinclhof'){
+    dir.style.display = 'none';
+    dirLabel.style.display = 'none';
+  } 
+  else if(quiz === 'voorvoegsels'){
+    dir.style.display = '';
+    dirLabel.style.display = '';
+    dir.value = 'numberToPrefix';
+    dir.querySelector('[value="numberToPrefix"]').style.display = '';
+    dir.querySelector('[value="prefixToNumber"]').style.display = '';
+  } 
+  else if(quiz === 'achtervoegsels'){
+    dir.style.display = '';
+    dirLabel.style.display = '';
+    dir.value = 'atomToSuffix';
+    dir.querySelector('[value="atomToSuffix"]').style.display = '';
+    dir.querySelector('[value="suffixToAtom"]').style.display = '';
+  }
+}  function maakRij(el, i, direction, quiz){
+    const tr = document.createElement('tr');
+
+    if(quiz === 'periodiek'){
+      let left = direction==='nameToSymbol' ? el.naam : el.symbool;
+      let right = direction==='nameToSymbol' ? el.symbool : el.naam;
+      tr.innerHTML = `<td>${i+1}</td>
+        <td>${left}</td>
+        <td><input class="answer" data-answer="${right}" aria-label="Antwoord voor ${left}"></td>
+        <td class="feedback"></td>`;
+    } 
+    else if(quiz === 'brinclhof'){
+      tr.innerHTML = `<td>${i+1}</td><td>___</td>
+        <td><input class="answer" data-answer="${el.naam}" aria-label="Antwoord voor ${i+1}"></td>
+        <td class="feedback"></td>`;
+    }
+    else if(quiz === 'voorvoegsels'){
+      let left, right;
+      if(direction==='numberToPrefix'){ left = el.index; right = el.naam; } 
+      else { left = el.naam; right = el.index; }
+      tr.innerHTML = `<td>${i+1}</td>
+        <td>${left}</td>
+        <td><input class="answer" data-answer="${right}" aria-label="Antwoord voor ${left}"></td>
+        <td class="feedback"></td>`;
+    }
+    else if(quiz === 'achtervoegsels'){
+      let left, right;
+      if(direction==='atomToSuffix'){ left = el.naam; right = el.achtervoegsel; } 
+      else { left = el.achtervoegsel; right = el.naam; }
+      tr.innerHTML = `<td>${i+1}</td>
+        <td>${left}</td>
+        <td><input class="answer" data-answer="${right}" aria-label="Antwoord voor ${left}"></td>
+        <td class="feedback"></td>`;
+    }
+
+    return tr;
+  }
+
+  function vulTabel(){
+    tbody.innerHTML = '';
+    const quiz = quizSelect.value;
+    let volgorde = [...quizData[quiz]];
+
+    if(quiz==='periodiek' || quiz==='voorvoegsels' || quiz==='achtervoegsels'){
+      shuffle(volgorde);
+    }
+    if(quiz==='brinclhof'){
+      volgorde = [
+        {naam: 'Broom'}, {naam: 'Jood'}, {naam: 'Stikstof'},
+        {naam: 'Chloor'}, {naam: 'Waterstof'}, {naam: 'Zuurstof'}, {naam: 'Fluor'}
+      ];
+    }
+
+    volgorde.forEach((el,i)=> tbody.appendChild(maakRij(el,i,directionSelect.value, quiz)));
+
+    // Kolomtitels
+    if(quiz==='periodiek'){
+      col1.textContent = directionSelect.value==='nameToSymbol' ? 'Element' : 'Symbool';
+      col2.textContent = directionSelect.value==='nameToSymbol' ? 'Symbool' : 'Element';
+    } 
+    else if(quiz==='voorvoegsels'){
+      col1.textContent = directionSelect.value==='numberToPrefix' ? 'Nr' : 'Voorvoegsel';
+      col2.textContent = directionSelect.value==='numberToPrefix' ? 'Voorvoegsel' : 'Nr';
+    } 
+    else if(quiz==='achtervoegsels'){
+      col1.textContent = directionSelect.value==='atomToSuffix' ? 'Atoom' : 'Achtervoegsel';
+      col2.textContent = directionSelect.value==='atomToSuffix' ? 'Achtervoegsel' : 'Atoom';
+    } 
+    else if(quiz==='brinclhof'){
+      col1.textContent = 'Nr';
+      col2.textContent = 'Vul in';
+    }
+
+    totalSpan.textContent = volgorde.length;
+    scoreSpan.textContent = 0;
+    resultDiv.textContent = '';
+  }
+
+  function checkAntwoorden(){
+    const quiz = quizSelect.value;
+    const inputs = Array.from(document.querySelectorAll('input.answer'));
+    let goed = 0;
+
+    inputs.forEach(inp=>{
+      const verwacht = inp.dataset.answer;
+      let gegeven = inp.value.trim();
+      const td = inp.parentElement.nextElementSibling;
+      inp.classList.remove('correct','wrong');
+      td.textContent='';
+
+      if(quiz==='periodiek'){
+        if(gegeven === verwacht){ inp.classList.add('correct'); td.textContent='Goed'; goed++; }
+        else { inp.classList.add('wrong'); td.textContent=`Fout, Volgende keer: ${verwacht}`; inp.value=verwacht; }
+      } else {
+        if(gegeven.toLowerCase() === verwacht.toLowerCase()){ inp.classList.add('correct'); td.textContent='Goed'; goed++; }
+        else { inp.classList.add('wrong'); td.textContent=`Fout, Volgende keer: ${verwacht}`; inp.value=verwacht; }
+      }
+    });
+
+    scoreSpan.textContent = goed;
+    resultDiv.textContent = `Je hebt ${goed} van de ${inputs.length} goed.`;
+  }
+
+  function showAnswers(){
+    const inputs = Array.from(document.querySelectorAll('input.answer'));
+    inputs.forEach(inp=>{
+      const verwacht = inp.dataset.answer;
+      inp.value = verwacht;
+      inp.classList.remove('wrong');
+      inp.classList.add('correct');
+      inp.disabled = true;
+      inp.parentElement.nextElementSibling.innerHTML=`<span class="ans">${verwacht}</span>`;
+    });
+    scoreSpan.textContent = inputs.length;
+    resultDiv.textContent = `Alle antwoorden (${inputs.length}) zijn nu zichtbaar.`;
+  }
+
+  function resetQuiz(){
+    const inputs = Array.from(document.querySelectorAll('input.answer'));
+    inputs.forEach(inp => inp.disabled = false);
+    vulTabel();
+  }
+
+  quizSelect.addEventListener('change', () => {
+    updateDirectionOptions();
+    resetQuiz();
+  });
+  directionSelect.addEventListener('change', resetQuiz);
+  document.getElementById('checkBtn').addEventListener('click', checkAntwoorden);
+  document.getElementById('showBtn').addEventListener('click', showAnswers);
+  document.getElementById('resetBtn').addEventListener('click', resetQuiz);
+
+  updateDirectionOptions();
+  vulTabel();
+});
+</script>
+
+</body>
+</html>
