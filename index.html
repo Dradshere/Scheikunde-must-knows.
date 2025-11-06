@@ -88,8 +88,13 @@ document.addEventListener("DOMContentLoaded", () => {
       {naam: 'Zuurstof', symbool: 'O'}, {naam: 'Zwavel', symbool: 'S'}
     ],
     brinclhof: [
-      {naam: 'Broom'}, {naam: 'Jood'}, {naam: 'Stikstof'},
-      {naam: 'Chloor'}, {naam: 'Waterstof'}, {naam: 'Zuurstof'}, {naam: 'Fluor'}
+      {naam: 'Broom', nummer: '1'}, 
+      {naam: 'Jood', nummer: '2'}, 
+      {naam: 'Stikstof', nummer: '3'},
+      {naam: 'Chloor', nummer: '4'}, 
+      {naam: 'Waterstof', nummer: '5'}, 
+      {naam: 'Zuurstof', nummer: '6'}, 
+      {naam: 'Fluor', nummer: '7'}
     ],
     voorvoegsels: [
       {naam: 'Mono', index: '1'}, {naam: 'Di', index: '2'},
@@ -162,35 +167,35 @@ function updateDirectionOptions(){
     }
 }
 
-  function maakRij(el,index,direction,quiz){
-    let left,right;
-    switch(quiz){
-      case 'periodiek':
-        left = direction==='nameToSymbol'? el.naam : el.symbool;
-        right = direction==='nameToSymbol'? el.symbool : el.naam;
-        break;
-      case 'brinclhof':
-        left = el.naam; right = el.naam;
-        break;
-      case 'voorvoegsels':
-        left = direction==='numberToPrefix'? el.index : el.naam;
-        right = direction==='numberToPrefix'? el.naam : el.index;
-        break;
-      case 'achtervoegsels':
-        left = direction==='atomToSuffix'? el.naam : el.achtervoegsel;
-        right = direction==='atomToSuffix'? el.achtervoegsel : el.naam;
-        break;
-      case 'ontleedbareStoffen':
-        left = direction==='nameToFormula'? el.naam : el.formule;
-        right = direction==='nameToFormula'? el.formule : el.naam;
-        break;
-    }
-    const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${index+1}</td><td>${left}</td><td><input class="answer" data-answer="${right}" aria-label="Antwoord voor ${left}"></td><td class="feedback"></td>`;
-    return tr;
+function maakRij(el,index,direction,quiz){
+  let left,right;
+  switch(quiz){
+    case 'periodiek':
+      left = direction==='nameToSymbol'? el.naam : el.symbool;
+      right = direction==='nameToSymbol'? el.symbool : el.naam;
+      break;
+    case 'brinclhof':
+      left = el.nummer;
+      right = el.naam;
+      break;
+    case 'voorvoegsels':
+      left = direction==='numberToPrefix'? el.index : el.naam;
+      right = direction==='numberToPrefix'? el.naam : el.index;
+      break;
+    case 'achtervoegsels':
+      left = direction==='atomToSuffix'? el.naam : el.achtervoegsel;
+      right = direction==='atomToSuffix'? el.achtervoegsel : el.naam;
+      break;
+    case 'ontleedbareStoffen':
+      left = direction==='nameToFormula'? el.naam : el.formule;
+      right = direction==='nameToFormula'? el.formule : el.naam;
+      break;
   }
-
-  function vulTabel(){
+  const tr = document.createElement('tr');
+  tr.innerHTML = `<td>${index+1}</td><td>${left}</td><td><input class="answer" data-answer="${right}" aria-label="Antwoord voor ${left}"></td><td class="feedback"></td>`;
+  return tr;
+}
+function vulTabel(){
     tbody.innerHTML='';
     const quiz = quizSelect.value;
     const direction = directionSelect.value;
@@ -200,12 +205,14 @@ function updateDirectionOptions(){
     if(['periodiek','voorvoegsels','achtervoegsels','ontleedbareStoffen'].includes(quiz)){
       shuffle(volgorde);
     }
-    if(quiz==='brinclhof'){
-      volgorde = [
-        {naam:'Broom'},{naam:'Jood'},{naam:'Stikstof'},
-        {naam:'Chloor'},{naam:'Waterstof'},{naam:'Zuurstof'},{naam:'Fluor'}
-      ];
-    }
+
+    // verwijder dit stuk:
+    // if(quiz==='brinclhof'){
+    //   volgorde = [
+    //     {naam:'Broom'},{naam:'Jood'},{naam:'Stikstof'},
+    //     {naam:'Chloor'},{naam:'Waterstof'},{naam:'Zuurstof'},{naam:'Fluor'}
+    //   ];
+    // }
 
     volgorde.forEach((el,i)=>tbody.appendChild(maakRij(el,i,direction,quiz)));
 
@@ -218,11 +225,12 @@ function updateDirectionOptions(){
         col2.textContent = direction==='nameToSymbol'?'Symbool':'Element';
         break;
       case 'brinclhof':
-        col1.textContent='Element'; col2.textContent='Element';
+        col1.textContent='Nummer';
+        col2.textContent='Element';
         break;
       case 'voorvoegsels':
-        col1.textContent = direction==='numberToPrefix'?'Nummer':'Voorvoegsel';
-        col2.textContent = direction==='numberToPrefix'?'Voorvoegsel':'Nummer';
+        col1.textContent = direction==='numberToPrefix'?'Index':'Voorvoegsel';
+        col2.textContent = direction==='numberToPrefix'?'Voorvoegsel':'Index';
         break;
       case 'achtervoegsels':
         col1.textContent = direction==='atomToSuffix'?'Atoom':'Achtervoegsel';
@@ -237,7 +245,7 @@ function updateDirectionOptions(){
     totalSpan.textContent = volgorde.length;
     scoreSpan.textContent = 0;
     resultDiv.textContent = '';
-  }
+}
 
   function checkAntwoorden(){
     const inputs = Array.from(document.querySelectorAll('input.answer'));
