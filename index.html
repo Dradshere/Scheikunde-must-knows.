@@ -238,7 +238,7 @@ function vulTabel(){
         break;
       case 'ontleedbareStoffen':
         col1.textContent = direction==='nameToFormula'?'Naam':'Formule';
-        col2.textContent = direction==='nameToFormula'?'Formule':'Naam';
+        col2.textContent = direction==='nameToForamula'?'Formule':'Naam';
         break;
     }
 
@@ -247,27 +247,40 @@ function vulTabel(){
     resultDiv.textContent = '';
 }
 
-  function checkAntwoorden(){
-    const inputs = Array.from(document.querySelectorAll('input.answer'));
-    const quiz = quizSelect.value;
-    const caseSensitive = (quiz==='periodiek' || quiz==='ontleedbareStoffen');
-    let goed = 0;
+ function checkAntwoorden(){
+  const inputs = Array.from(document.querySelectorAll('input.answer'));
+  const quiz = quizSelect.value;
+  const caseSensitive = (quiz==='periodiek' || quiz==='ontleedbareStoffen');
+  let goed = 0;
 
-    inputs.forEach(inp=>{
-      const verwacht = inp.dataset.answer;
-      const gegeven = inp.value.trim();
-      const td = inp.parentElement.nextElementSibling;
-      inp.classList.remove('correct','wrong'); td.textContent='';
+  inputs.forEach(inp=>{
+    const verwacht = inp.dataset.answer;
+    const gegeven = inp.value.trim();
+    const td = inp.parentElement.nextElementSibling;
+    inp.classList.remove('correct','wrong'); 
+    td.textContent='';
 
-      const correct = caseSensitive? gegeven===verwacht : gegeven.toLowerCase()===verwacht.toLowerCase();
+    const correct = caseSensitive? gegeven===verwacht : gegeven.toLowerCase()===verwacht.toLowerCase();
 
-      if(gegeven===''){ inp.classList.add('wrong'); td.textContent=`Leeg, Volgende keer: ${verwacht}`; inp.value=verwacht; }
-      else if(correct){ inp.classList.add('correct'); td.textContent='Goed'; goed++; }
-      else{ inp.classList.add('wrong'); td.textContent=`Fout, Volgende keer: ${verwacht}`; inp.value=verwacht; }
-    });
-    scoreSpan.textContent = goed;
-    resultDiv.textContent = `Je hebt ${goed} van de ${inputs.length} goed.`;
-  }
+    if(gegeven===''){
+      inp.classList.add('wrong');
+      td.textContent=`Leeg, Volgende keer: ${verwacht}`;
+    }
+    else if(correct){
+      inp.classList.add('correct');
+      td.textContent='Goed';
+      goed++;
+    }
+    else{
+      inp.classList.add('wrong');
+      td.textContent=`Fout, Volgende keer: ${verwacht}`;
+    }
+  });
+
+  scoreSpan.textContent = goed;
+  resultDiv.textContent = `Je hebt ${goed} van de ${inputs.length} goed.`;
+}
+
 
   function showAnswers(){
     const inputs = Array.from(document.querySelectorAll('input.answer'));
